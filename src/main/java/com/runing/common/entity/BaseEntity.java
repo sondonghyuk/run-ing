@@ -1,4 +1,4 @@
-package com.runing.common;
+package com.runing.common.entity;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
