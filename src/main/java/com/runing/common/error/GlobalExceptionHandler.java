@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
 		ErrorCode errorCode = ex.getErrorCode();
 		return ResponseEntity
 			.status(errorCode.getStatus())
-			.body(new ErrorResponse(errorCode.getStatus(), errorCode.getCode(), errorCode.getMessage()));
+			.body(new ErrorResponse(errorCode.getStatus().value(), errorCode.getCode(), errorCode.getMessage()));
 	}
 
 	@ExceptionHandler(Exception.class)
@@ -27,6 +27,6 @@ public class GlobalExceptionHandler {
 		ErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
 		return ResponseEntity
 			.status(errorCode.getStatus())
-			.body(new ErrorResponse(errorCode.getStatus(), errorCode.getCode(), errorCode.getMessage()));
+			.body(new ErrorResponse(errorCode.getStatus().value(), errorCode.getCode(), errorCode.getMessage()));
 	}
 }
