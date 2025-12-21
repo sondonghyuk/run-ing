@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.runing.common.response.ApiResponse;
+import com.runing.common.response.ErrorResponse;
 
 /**
  * @RestController 로 선언한 지점에서 발생한 에러를 도중에
@@ -13,14 +13,20 @@ import com.runing.common.response.ApiResponse;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-	/**
-	 * 공통 예외 처리
-	 * BaseException 처리
-	 */
+
 	@ExceptionHandler(BaseException.class)
-	public ResponseEntity<ApiResponse<?>> handleBaseException(BaseException ex){
+	public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex){
+		ErrorCode errorCode = ex.getErrorCode();
 		return ResponseEntity
-			.status(ex.getErrorCode().getStatus())
-			.body(ApiResponse.fail(ex.getErrorCode()));
+			.status(errorCode.getStatus())
+			.body(new ErrorResponse(errorCode.getStatus(), errorCode.getCode(), errorCode.getMessage()));
+	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ErrorResponse> handleException(Exception ex){
+		ErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
+		return ResponseEntity
+			.status(errorCode.getStatus())
+			.body(new ErrorResponse(errorCode.getStatus(), errorCode.getCode(), errorCode.getMessage()));
 	}
 }
