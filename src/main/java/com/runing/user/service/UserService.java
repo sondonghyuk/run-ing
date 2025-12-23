@@ -9,6 +9,7 @@ import com.runing.common.error.UserErrorCode;
 import com.runing.user.dto.UserCreateRequest;
 import com.runing.user.dto.UserDto;
 import com.runing.user.entity.User;
+import com.runing.user.mapper.UserMapper;
 import com.runing.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final UserMapper userMapper;
 
 	// 유저 생성
 	@Transactional
