@@ -20,7 +20,7 @@ public class User extends BaseEntity {
 	@Column(nullable = false, unique = true, length = 255)
 	private String email; // 이메일(아이디)
 
-	@Column(nullable = false, length = 255)
+	@Column(nullable = false, length = 60)
 	private String password; // 비밀번호
 
 	@Column(nullable = false, length = 50)
