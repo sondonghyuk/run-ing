@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -39,15 +40,35 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		// cors
 		http
 			.cors(cors -> cors
 				.configurationSource(corsConfigurationSource())
 			);
+
+		// csrf
+		http.csrf(auth->auth.disable());
+
+		// form 로그인 방식
 		http
-			.csrf(csrf -> csrf.disable())
+			.formLogin(auth->auth.disable());
+
+		// http basic 인증 방식
+		http
+			.httpBasic(auth->auth.disable());
+
+		// 경로별 인가 방식
+		http
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(HttpMethod.POST, "/users/signup").permitAll()
-				.anyRequest().permitAll()
+				.requestMatchers(HttpMethod.POST, "/users/login").permitAll()
+				.anyRequest().authenticated()
+			);
+
+		// 세션 설정
+		http
+			.sessionManagement(session -> session
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			);
 
 		return http.build();
