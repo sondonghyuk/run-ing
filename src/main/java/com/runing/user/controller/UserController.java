@@ -16,14 +16,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @Slf4j
 @RequiredArgsConstructor
 public class UserController {
 	private final UserService userService;
 
 	// 회원가입
-	@PostMapping
+	@PostMapping("/signup")
 	public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateRequest request) {
 		UserDto userDto = userService.createUser(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
