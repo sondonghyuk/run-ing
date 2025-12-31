@@ -7,7 +7,8 @@ import org.springframework.http.HttpStatus;
  */
 public enum UserErrorCode implements ErrorCode {
 	USER_EMAIL_EXISTS(HttpStatus.BAD_REQUEST,"U001","이미 존재하는 이메일 입니다."),
-	USER_NICKNAME_EXISTS(HttpStatus.BAD_REQUEST,"U002","이미 존재하는 닉네임 입니다.")
+	USER_NICKNAME_EXISTS(HttpStatus.BAD_REQUEST,"U002","이미 존재하는 닉네임 입니다."),
+	USER_NOT_FOUND(HttpStatus.NOT_FOUND,"U003","Username 을 찾을 수 없습니다."),
 	;
 
 	private final HttpStatus status;
