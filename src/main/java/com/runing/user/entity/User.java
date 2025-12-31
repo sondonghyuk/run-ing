@@ -26,9 +26,6 @@ public class User extends BaseEntity {
 	@Column(nullable = false, length = 50)
 	private String name; // 실제 이름
 
-	@Column(nullable = false, unique = true, length = 20)
-	private String nickname; // 사용할 닉네임
-
 	@Column(nullable = false, length = 20)
 	private String phoneNumber; // 전화번호(010-0000-1111)
 
@@ -42,11 +39,10 @@ public class User extends BaseEntity {
 	@Column(nullable = false)
 	private boolean deleted;
 
-	public User(String email, String password, String name, String nickname, String phoneNumber, String profileUrl) {
+	public User(String email, String password, String name, String phoneNumber, String profileUrl) {
 		this.email = email;
 		this.password = password;
 		this.name = name;
-		this.nickname = nickname;
 		this.phoneNumber = phoneNumber;
 		this.profileUrl = profileUrl;
 		this.role = Role.USER;

@@ -29,25 +29,21 @@ public class UserService {
 
 		// 1. 변수 설정
 		String email = request.email();
-		String nickname = request.nickname();
 		String username = request.name();
 		String password = request.password();
 		String phoneNumber = request.phoneNumber();
 
-		log.debug("사용자 생성 시작: email={}, nickname={}", email, nickname);
+		log.debug("사용자 생성 시작: email={}, username={}", email, username);
 
 		// 2. 중복검증
 		if (userRepository.existsByEmail(email)) {
 			throw new BaseException(UserErrorCode.USER_EMAIL_EXISTS);
 		}
-		if (userRepository.existsByNickname(nickname)) {
-			throw new BaseException(UserErrorCode.USER_NICKNAME_EXISTS);
-		}
 
 		// 3. 유저 생성
 		// todo : profileURL -> BinaryContent
 		String hashedPassword = passwordEncoder.encode(password);
-		User user = new User(email, hashedPassword, username, nickname, phoneNumber, request.profileUrl());
+		User user = new User(email, hashedPassword, username, phoneNumber, request.profileUrl());
 
 		// 4. 유저 저장
 		userRepository.save(user);
