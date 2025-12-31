@@ -2,6 +2,7 @@ package com.runing.jwt;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -37,23 +38,27 @@ public class JWTUtil {
 		this.accessTokenExpiration = accessTokenExpiration;
 	}
 
-	// 토큰 생성
-	public String createJwt(Long userId, String email, String nickname, Role role) {
-		Date now = new Date();
-		Date expiration = new Date(now.getTime() + accessTokenExpiration);
+	// AccessToken 토큰 생성
+	public String createAccessToken(JWTUserDto user){
+		return createJWT(user,accessTokenExpiration);
+	}
 
+	// JWT 생성
+	private String createJWT(JWTUserDto user, Long expiration) {
+		Date now = new Date();
+		Date expirationDate = new Date(now.getTime() + expiration);
 		String token = Jwts.builder()
-			.subject(String.valueOf(userId))
-			.claim("email", email)
-			.claim("nickname", nickname)
-			.claim("role", role.name())
+			.subject(String.valueOf(user.userUuid()))
+			.claim("email", user.email())
+			.claim("name", user.name())
+			.claim("role", user.role().name())
 			.issuedAt(now)
-			.expiration(expiration)
+			.expiration(expirationDate)
 			.signWith(secretKey)
 			.compact();
 
-		log.info("JWT 토큰 생성 완료 - email: {} , nickname: {}, role: {}, expiredAt: {}",
-			email, nickname, role, expiration);
+		log.info("JWT 토큰 생성 완료 - email: {} , name: {}, role: {}, expirationDate: {}",
+			user.email(), user.name(), user.role(), expirationDate);
 
 		return token;
 	}
@@ -85,28 +90,27 @@ public class JWTUtil {
 	}
 
 	// 토큰에서 정보 추출
-	public Long getUserId(String token) {
-		return Long.valueOf(getClaims(token).getSubject());
+	public UUID getUserUuid(Claims claims) {
+		return UUID.fromString(claims.getSubject());
 	}
 
-	public String getEmail(String token) {
-		return getClaims(token).get("email", String.class);
+	public String getEmail(Claims claims) {
+		return claims.get("email", String.class);
 	}
 
-	public String getNickname(String token) {
-		return getClaims(token)
-			.get("nickname", String.class);
+	public String getName(Claims claims) {
+		return claims.get("name", String.class);
 	}
 
-	public Role getRole(String token) {
-		return Role.valueOf(getClaims(token).get("role", String.class));
+	public Role getRole(Claims claims) {
+		return Role.valueOf(claims.get("role", String.class));
 	}
 
-	public Date getExpired(String token) {
-		return getClaims(token).getExpiration();
+	public Date getExpired(Claims claims) {
+		return claims.getExpiration();
 	}
 
-	public Date getIssuedAt(String token) {
-		return getClaims(token).getIssuedAt();
+	public Date getIssuedAt(Claims claims) {
+		return claims.getIssuedAt();
 	}
 }
