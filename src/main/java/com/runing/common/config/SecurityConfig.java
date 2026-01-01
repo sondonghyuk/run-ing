@@ -18,7 +18,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.runing.jwt.CustomUserDetailsService;
 import com.runing.jwt.CustomUsernamePasswordAuthenticationFilter;
+import com.runing.jwt.JWTAuthenticationFilter;
 import com.runing.jwt.JWTUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final JWTUtil jwtUtil;
+	private final CustomUserDetailsService customUserDetailsService;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
@@ -56,7 +59,8 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager,
+		CustomUserDetailsService customUserDetailsService) throws Exception {
 		// cors
 		http
 			.cors(cors -> cors
@@ -84,6 +88,7 @@ public class SecurityConfig {
 
 		// 필터 추가
 		http
+			.addFilterBefore(new JWTAuthenticationFilter(jwtUtil,customUserDetailsService),CustomUsernamePasswordAuthenticationFilter.class)
 			.addFilterAt(new CustomUsernamePasswordAuthenticationFilter(authenticationManager,jwtUtil),
 				UsernamePasswordAuthenticationFilter.class);
 
