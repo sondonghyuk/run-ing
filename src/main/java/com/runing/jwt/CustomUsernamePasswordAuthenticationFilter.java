@@ -1,15 +1,15 @@
 package com.runing.jwt;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.runing.user.entity.Role;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -46,19 +46,19 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 		try {
 			// 사용자 정보 추출
 			CustomUserDetails customUserDetails = (CustomUserDetails)authResult.getPrincipal();
-			String username = customUserDetails.getUsername();
-			String role = authResult.getAuthorities().stream()
-				.findFirst()
-				.map(GrantedAuthority::getAuthority)
-				.orElse("ROLE_USER");
 
+			UUID userUuid = customUserDetails.getUesrUuid();
+			String email = customUserDetails.getEmail();
+			String name = customUserDetails.getUsername();
+			Role role = customUserDetails.getRole();
 			//jwt 토큰 생성
-			String token = jwtUtil.createJwt(username, role);
+			JWTUserDto user = new JWTUserDto(userUuid,email,name,role);
+			String token = jwtUtil.createAccessToken(user);
 
 			//응답 설정
 			response.addHeader("Authorization", "Bearer " + token);
 
-			log.info("로그인 성공 - username: {}, role: {}", username, role);
+			log.info("로그인 성공 - name: {}, role: {}", name, role);
 		} catch (Exception e) {
 			log.error("JWT 토큰 생성 중 오류 발생", e);
 		}

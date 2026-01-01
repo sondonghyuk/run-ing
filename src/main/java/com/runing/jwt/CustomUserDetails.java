@@ -2,11 +2,13 @@ package com.runing.jwt;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.runing.user.entity.Role;
 import com.runing.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,15 @@ public class CustomUserDetails implements UserDetails {
 		return authorities;
 	}
 
+	public @Nullable UUID getUesrUuid(){
+		return user.getUuid();
+	}
+	public @Nullable String getEmail(){
+		return user.getEmail();
+	}
+	public @Nullable Role getRole(){
+		return user.getRole();
+	}
 	@Override
 	public @Nullable String getPassword() {
 		return user.getPassword();
