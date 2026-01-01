@@ -1,6 +1,7 @@
 package com.runing.user.repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,9 +11,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	// 이메일 중복 확인
 	boolean existsByEmail(String email);
 
-	// 이메일로 찾기
+	// 이메일로 조회
 	Optional<User> findByEmail(String email);
 
-	// 이름으로 찾기
-	Optional<User> findByUsername(String username);
+	// UUID로 조회
+	Optional<User> findByUuid(UUID uuid);
 }

@@ -30,15 +30,7 @@ public class CustomUserDetails implements UserDetails {
 		return authorities;
 	}
 
-	public @Nullable UUID getUesrUuid(){
-		return user.getUuid();
-	}
-	public @Nullable String getEmail(){
-		return user.getEmail();
-	}
-	public @Nullable Role getRole(){
-		return user.getRole();
-	}
+
 	@Override
 	public @Nullable String getPassword() {
 		return user.getPassword();
@@ -46,7 +38,7 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public String getUsername() {
-		return user.getName();
+		return user.getEmail(); // email 을 username 으로 사용
 	}
 
 	@Override
@@ -67,5 +59,18 @@ public class CustomUserDetails implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		return true;
+	}
+
+	public @Nullable UUID getUesrUuid(){
+		return user.getUuid();
+	}
+	public @Nullable String getEmail(){
+		return user.getEmail();
+	}
+	public @Nullable String getName(){
+		return user.getName();
+	}
+	public @Nullable Role getRole(){
+		return user.getRole();
 	}
 }

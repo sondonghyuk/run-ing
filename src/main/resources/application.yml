@@ -20,10 +20,10 @@ spring:
         jdbc:
           time_zone: Asia/Seoul
 
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}  # 기본값 1시간
+    refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}  # 기본값 7일
+
 server:
   port: 8080
-
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expire-time: 1800000
-  refresh-token-expire-time: 1209600000

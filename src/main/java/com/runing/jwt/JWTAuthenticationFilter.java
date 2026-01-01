@@ -55,16 +55,16 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 			// JWT 유효성 검증 성공 후
 			Claims claims = jwtUtil.getClaims(token);
-			String name = jwtUtil.getName(claims);
+			String email = jwtUtil.getEmail(claims);
 
-			log.debug("JWT token 인증 유저 : {}",name);
+			log.debug("JWT token 인증 유저 : {}",email);
 
 			// 데이터베이스에서 사용자 정보 조회
-			UserDetails userDetails = customUserDetailsService.loadUserByUsername(name);
+			UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
 
 			// 사용자가 존재 하지 않는 경우
 			if (userDetails == null) {
-				log.warn("사용자가 존재하지 않음 : {}",name);
+				log.warn("사용자가 존재하지 않음 : {}", email);
 				sendErrorResponse(response, "사용자가 존재하지 않음");
 			}
 
