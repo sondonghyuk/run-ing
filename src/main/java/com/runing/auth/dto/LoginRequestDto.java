@@ -1,4 +1,4 @@
-package com.runing.user.dto;
+package com.runing.auth.dto;
 
 import jakarta.validation.constraints.NotNull;
 
