@@ -8,8 +8,11 @@ import com.runing.common.error.BaseException;
 import com.runing.common.error.UserErrorCode;
 import com.runing.user.dto.UserCreateRequest;
 import com.runing.user.dto.UserDto;
+import com.runing.user.dto.UserUpdateRequest;
+import com.runing.user.entity.Profile;
 import com.runing.user.entity.User;
 import com.runing.user.mapper.UserMapper;
+import com.runing.user.repository.ProfileRepository;
 import com.runing.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -20,37 +23,79 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserService {
 	private final UserRepository userRepository;
+	private final ProfileRepository profileRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final UserMapper userMapper;
 
-	// 유저 생성
+	// 회원가입
 	@Transactional
 	public UserDto createUser(UserCreateRequest request) {
+		log.debug("사용자 생성 시작: email={}", request.email());
 
-		// 1. 변수 설정
-		String email = request.email();
-		String username = request.name();
-		String password = request.password();
-		String phoneNumber = request.phoneNumber();
+		// 중복검증
+		validateDuplicateUser(request.email(), request.nickname());
 
-		log.debug("사용자 생성 시작: email={}, username={}", email, username);
+		// 유저 생성
+		String hashedPassword = passwordEncoder.encode(request.password());
+		User user = new User(request.email(), hashedPassword);
+		Profile profile = new Profile(
+			request.nickname(),
+			request.name(),
+			request.phoneNumber(),
+			request.profileUrl(),
+			request.region()
+		);
+		user.attachProfile(profile);
 
-		// 2. 중복검증
+		// 저장
+		User savedUser = userRepository.save(user);
+		log.info("사용자 생성 완료 : id={} , email={}, username={}", savedUser.getId(), savedUser.getEmail(),
+			savedUser.getProfile().getName());
+
+		// userDto 변환 후 반환
+		return userMapper.toDto(savedUser);
+	}
+
+	// 회원정보 수정
+	@Transactional
+	public void updateProfile(Long userId, UserUpdateRequest request) {
+		// 유저 찾기
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+		// 닉네임 변경 시 중복 검증
+		validateNicknameChange(user,request.nickname());
+
+		// 회원정보 수정
+		user.getProfile().update(
+			request.nickname(),
+			request.name(),
+			request.phoneNumber(),
+			request.profileUrl(),
+			request.region()
+		);
+
+		log.info("프로필 업데이트 완료 : userId={}", userId);
+	}
+
+	// 이메일, 닉네임 중복 검증
+	private void validateDuplicateUser(String email, String nickname) {
 		if (userRepository.existsByEmail(email)) {
 			throw new BaseException(UserErrorCode.USER_EMAIL_EXISTS);
 		}
-
-		// 3. 유저 생성
-		// todo : profileURL -> BinaryContent
-		String hashedPassword = passwordEncoder.encode(password);
-		User user = new User(email, hashedPassword, username, phoneNumber, request.profileUrl());
-
-		// 4. 유저 저장
-		userRepository.save(user);
-		log.info("사용자 생성 완료 : id={} , email={}, username={}", user.getId(), email, username);
-
-		// 4. userDto 변환 후 반환
-		return userMapper.toDto(user);
+		if (profileRepository.existsByNickname(nickname)) {
+			throw new BaseException(UserErrorCode.USER_NICKNAME_EXISTS);
+		}
 	}
 
+	// 닉네임 중복 검증
+	private void validateNicknameChange(User user,String newNickname) {
+		// 기존 닉네임과 같으면 검증 불필요
+		if (newNickname.equals(user.getProfile().getNickname())) return;
+
+		// 중복 검증
+		if (profileRepository.existsByNickname(newNickname)) {
+			throw new BaseException(UserErrorCode.USER_NICKNAME_EXISTS);
+		}
+	}
 }
