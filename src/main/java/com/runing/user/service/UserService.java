@@ -78,6 +78,22 @@ public class UserService {
 		log.info("프로필 업데이트 완료 : userId={}", userId);
 	}
 
+	// 이메일 중복 확인
+	@Transactional(readOnly = true)
+	public void checkDuplicateEmail(String email) {
+		if(userRepository.existsByEmail(email)) {
+			throw new BaseException(UserErrorCode.USER_EMAIL_EXISTS);
+		}
+	}
+
+	// 닉네임 중복 확인
+	@Transactional(readOnly = true)
+	public void checkDuplicateNickname(String nickname) {
+		if (profileRepository.existsByNickname(nickname)) {
+			throw new BaseException(UserErrorCode.USER_NICKNAME_EXISTS);
+		}
+	}
+
 	// 이메일, 닉네임 중복 검증
 	private void validateDuplicateUser(String email, String nickname) {
 		if (userRepository.existsByEmail(email)) {
