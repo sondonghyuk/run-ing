@@ -9,6 +9,8 @@ public enum UserErrorCode implements ErrorCode {
 	USER_EMAIL_EXISTS(HttpStatus.BAD_REQUEST,"U001","이미 존재하는 이메일 입니다."),
 	USER_NICKNAME_EXISTS(HttpStatus.BAD_REQUEST,"U002","이미 존재하는 닉네임 입니다."),
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND,"U003","Username 을 찾을 수 없습니다."),
+	PROFILE_CANNOT_NULL(HttpStatus.BAD_REQUEST,"U004","Profile 은 null 이 될 수 없습니다."),
+	USER_ALREADY_WITHDRAW(HttpStatus.BAD_REQUEST,"U005","해당 User 은 이미 비활성화 상태 입니다."),
 	;
 
 	private final HttpStatus status;

@@ -1,11 +1,16 @@
 package com.runing.user.entity;
+import java.time.LocalDateTime;
 
 import com.runing.common.entity.BaseEntity;
+import com.runing.common.error.BaseException;
+import com.runing.common.error.UserErrorCode;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,51 +28,72 @@ public class User extends BaseEntity {
 	@Column(nullable = false, length = 60)
 	private String password; // 비밀번호
 
-	@Column(nullable = false, length = 50)
-	private String name; // 실제 이름
-
-	@Column(nullable = false, length = 20)
-	private String phoneNumber; // 전화번호(010-0000-1111)
-
-	@Column(length = 255)
-	private String profileUrl; // 프로필 이미지 url
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Role role; // 회원 역할
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private Role role;
+	private UserStatus status; // 회원 상태
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private boolean deleted;
+	private AuthProvider authProvider; // OAuth
 
-	public User(String email, String password, String name, String phoneNumber, String profileUrl) {
+	private LocalDateTime lastLoginAt; // 마지막 로그인 시간
+
+	private LocalDateTime deletedAt; // 탈퇴 시점
+
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Profile profile;
+
+	public User(String email, String password) {
 		this.email = email;
 		this.password = password;
-		this.name = name;
-		this.phoneNumber = phoneNumber;
-		this.profileUrl = profileUrl;
 		this.role = Role.USER;
-		this.deleted = false;
+		this.authProvider = AuthProvider.LOCAL;
+		this.status = UserStatus.ACTIVE;
 	}
 
-	public void updateProfile(String newName, String newPhoneNumber, String newProfileUrl) {
-		if (newName != null && !newName.equals(this.name)){
-			this.name = newName;
-		}
-		if (newPhoneNumber != null && !newPhoneNumber.equals(this.phoneNumber)){
-			this.phoneNumber = newPhoneNumber;
-		}
-		if (newProfileUrl != null && !newProfileUrl.equals(this.profileUrl)){
-			this.profileUrl = newProfileUrl;
-		}
+	// OAuth 로그인용 생성자
+	public User(String email, AuthProvider authProvider) {
+		this.email = email;
+		this.password = "OAUTH"; // OAuth는 비밀번호 불필요
+		this.authProvider = authProvider;
+		this.role = Role.USER;
+		this.status = UserStatus.ACTIVE;
 	}
 
-	/**
-	 * 소프트 삭제
-	 */
-	public void delete() {
-		this.deleted = true;
+	public void attachProfile(Profile profile) {
+		if (profile == null) {
+			throw new BaseException(UserErrorCode.PROFILE_CANNOT_NULL);
+		}
+		this.profile = profile;
+		profile.attachUser(this);
 	}
-	public void restore() {
-		this.deleted = false;
+
+	// 휴먼 계정 전환
+	public void markInactive() {
+		if (this.status == UserStatus.WITHDRAWN) {
+			throw new BaseException(UserErrorCode.USER_ALREADY_WITHDRAW);
+		}
+		this.status = UserStatus.INACTIVE;
 	}
+
+	//탈퇴 여부 확인
+	public boolean isWithdraw(){
+		return this.status == UserStatus.WITHDRAWN;
+	}
+
+	// 탈퇴
+	public void withdraw(){
+		this.status = UserStatus.WITHDRAWN;
+		this.deletedAt = LocalDateTime.now();
+	}
+
+	// 마지막 로그인 시간
+	public void updateLastLoginAt() {
+		this.lastLoginAt = LocalDateTime.now();
+	}
+
 }
