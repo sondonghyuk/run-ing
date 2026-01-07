@@ -1,7 +1,10 @@
 package com.runing.user.controller;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.runing.jwt.CustomUserDetails;
+import com.runing.user.dto.ProfileDto;
 import com.runing.user.dto.UserCreateRequest;
 import com.runing.user.dto.UserDto;
 import com.runing.user.service.UserService;
@@ -56,5 +61,15 @@ public class UserController {
 		String nickname) {
 		userService.checkDuplicateNickname(nickname);
 		return ResponseEntity.ok().build();
+	}
+
+	// 마이페이지
+	@GetMapping("/me")
+	public ResponseEntity<ProfileDto> myPage(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails
+	) {
+		UUID userId = customUserDetails.getUesrUuid();
+		ProfileDto profile = userService.getMyProfile(userId);
+		return ResponseEntity.ok().body(profile);
 	}
 }

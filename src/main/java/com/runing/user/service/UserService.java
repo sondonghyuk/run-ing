@@ -1,16 +1,20 @@
 package com.runing.user.service;
 
+import java.util.UUID;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.runing.common.error.BaseException;
 import com.runing.common.error.UserErrorCode;
+import com.runing.user.dto.ProfileDto;
 import com.runing.user.dto.UserCreateRequest;
 import com.runing.user.dto.UserDto;
 import com.runing.user.dto.UserUpdateRequest;
 import com.runing.user.entity.Profile;
 import com.runing.user.entity.User;
+import com.runing.user.mapper.ProfileMapper;
 import com.runing.user.mapper.UserMapper;
 import com.runing.user.repository.ProfileRepository;
 import com.runing.user.repository.UserRepository;
@@ -26,6 +30,7 @@ public class UserService {
 	private final ProfileRepository profileRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final UserMapper userMapper;
+	private final ProfileMapper profileMapper;
 
 	// 회원가입
 	@Transactional
@@ -56,6 +61,21 @@ public class UserService {
 		return userMapper.toDto(savedUser);
 	}
 
+	// 마이페이지 조회
+	public ProfileDto getMyProfile(UUID userUuid){
+		// 유저 찾기
+		User user = userRepository.findByUuid(userUuid)
+			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+		// 프로필 검증
+		if (user.getProfile() == null) {
+			throw new BaseException(UserErrorCode.PROFILE_NOT_FOUND);
+		}
+
+		return profileMapper.toDto(user);
+	}
+
+
 	// 회원정보 수정
 	@Transactional
 	public void updateProfile(Long userId, UserUpdateRequest request) {
@@ -78,22 +98,6 @@ public class UserService {
 		log.info("프로필 업데이트 완료 : userId={}", userId);
 	}
 
-	// 이메일 중복 확인
-	@Transactional(readOnly = true)
-	public void checkDuplicateEmail(String email) {
-		if(userRepository.existsByEmail(email)) {
-			throw new BaseException(UserErrorCode.USER_EMAIL_EXISTS);
-		}
-	}
-
-	// 닉네임 중복 확인
-	@Transactional(readOnly = true)
-	public void checkDuplicateNickname(String nickname) {
-		if (profileRepository.existsByNickname(nickname)) {
-			throw new BaseException(UserErrorCode.USER_NICKNAME_EXISTS);
-		}
-	}
-
 	// 이메일, 닉네임 중복 검증
 	private void validateDuplicateUser(String email, String nickname) {
 		if (userRepository.existsByEmail(email)) {
@@ -111,6 +115,22 @@ public class UserService {
 
 		// 중복 검증
 		if (profileRepository.existsByNickname(newNickname)) {
+			throw new BaseException(UserErrorCode.USER_NICKNAME_EXISTS);
+		}
+	}
+
+	// 이메일 중복 확인 (API 용도)
+	@Transactional(readOnly = true)
+	public void checkDuplicateEmail(String email) {
+		if(userRepository.existsByEmail(email)) {
+			throw new BaseException(UserErrorCode.USER_EMAIL_EXISTS);
+		}
+	}
+
+	// 닉네임 중복 확인 (API 용도)
+	@Transactional(readOnly = true)
+	public void checkDuplicateNickname(String nickname) {
+		if (profileRepository.existsByNickname(nickname)) {
 			throw new BaseException(UserErrorCode.USER_NICKNAME_EXISTS);
 		}
 	}

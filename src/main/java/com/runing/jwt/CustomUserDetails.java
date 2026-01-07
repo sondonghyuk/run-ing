@@ -68,7 +68,7 @@ public class CustomUserDetails implements UserDetails {
 		return user.getEmail();
 	}
 	public @Nullable String getName(){
-		return user.getName();
+		return user.getProfile().getName();
 	}
 	public @Nullable Role getRole(){
 		return user.getRole();
