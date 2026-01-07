@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.runing.jwt.CustomUserDetails;
 import com.runing.user.dto.ProfileDto;
 import com.runing.user.dto.UserCreateRequest;
 import com.runing.user.dto.UserDto;
+import com.runing.user.dto.UserUpdateRequest;
 import com.runing.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -68,8 +70,19 @@ public class UserController {
 	public ResponseEntity<ProfileDto> myPage(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
-		UUID userId = customUserDetails.getUesrUuid();
+		UUID userId = customUserDetails.getUserUuid();
 		ProfileDto profile = userService.getMyProfile(userId);
 		return ResponseEntity.ok().body(profile);
 	}
+
+	// 회원 정보 수정
+	@PatchMapping("/me")
+	public ResponseEntity<ProfileDto> updateMyProfile(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@Valid @RequestBody UserUpdateRequest userUpdateRequest
+	){
+		ProfileDto updateProfile = userService.updateProfile(customUserDetails.getUserUuid(), userUpdateRequest);
+		return ResponseEntity.ok().body(updateProfile);
+	}
+
 }

@@ -47,7 +47,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 			// 사용자 정보 추출
 			CustomUserDetails customUserDetails = (CustomUserDetails)authResult.getPrincipal();
 
-			UUID userUuid = customUserDetails.getUesrUuid();
+			UUID userUuid = customUserDetails.getUserUuid();
 			String email = customUserDetails.getEmail();
 			String name = customUserDetails.getUsername();
 			Role role = customUserDetails.getRole();

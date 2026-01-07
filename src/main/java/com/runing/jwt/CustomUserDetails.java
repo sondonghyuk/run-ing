@@ -61,7 +61,7 @@ public class CustomUserDetails implements UserDetails {
 		return true;
 	}
 
-	public @Nullable UUID getUesrUuid(){
+	public @Nullable UUID getUserUuid(){
 		return user.getUuid();
 	}
 	public @Nullable String getEmail(){

@@ -78,16 +78,21 @@ public class UserService {
 
 	// 회원정보 수정
 	@Transactional
-	public void updateProfile(Long userId, UserUpdateRequest request) {
+	public ProfileDto updateProfile(UUID userUuid, UserUpdateRequest request) {
 		// 유저 찾기
-		User user = userRepository.findById(userId)
+		User user = userRepository.findByUuid(userUuid)
 			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+		Profile profile = user.getProfile();
+		if (profile == null) {
+			throw new BaseException(UserErrorCode.PROFILE_NOT_FOUND);
+		}
 
 		// 닉네임 변경 시 중복 검증
 		validateNicknameChange(user,request.nickname());
 
 		// 회원정보 수정
-		user.getProfile().update(
+		profile.update(
 			request.nickname(),
 			request.name(),
 			request.phoneNumber(),
@@ -95,7 +100,9 @@ public class UserService {
 			request.region()
 		);
 
-		log.info("프로필 업데이트 완료 : userId={}", userId);
+		log.info("프로필 업데이트 완료 : userId={}, email={}", userUuid, user.getEmail());
+
+		return profileMapper.toDto(user);
 	}
 
 	// 이메일, 닉네임 중복 검증
