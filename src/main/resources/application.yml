@@ -25,5 +25,18 @@ spring:
     access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}  # 기본값 1시간
     refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}  # 기본값 7일
 
+  mail:
+    host: smtp.gmail.com #Gmail 의 SMTP 서버 호스트
+    port: 587
+    username: sondonghyuk0304@gmail.com
+    password : ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true #SMTP 서버에 인증 필요한 경우
+          starttls:
+            enable: true #SMTP 서버가 TLS 암호화를 사용하여 안전한 연결을 요구하는 경우
+
+
 server:
   port: 8080
