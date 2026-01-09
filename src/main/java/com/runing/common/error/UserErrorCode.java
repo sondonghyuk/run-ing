@@ -12,6 +12,9 @@ public enum UserErrorCode implements ErrorCode {
 	PROFILE_CANNOT_NULL(HttpStatus.BAD_REQUEST,"U004","Profile 은 null 이 될 수 없습니다."),
 	USER_ALREADY_WITHDRAW(HttpStatus.BAD_REQUEST,"U005","해당 User 은 이미 비활성화 상태 입니다."),
 	PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND,"U006","Profile 을 찾을 수 없습니다."),
+	EMAIL_SEND_FAIL(HttpStatus.SERVICE_UNAVAILABLE,"U007","메일 전송에 실패했습니다."),
+	EMAIL_SEND_TOO_FREQUENT(HttpStatus.BAD_REQUEST,"U008","메일 전송한지 1분이 지나지 않았습니다."),
+	EMAIL_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST,"U009","이미 인증된 이메일입니다."),
 	;
 
 	private final HttpStatus status;
