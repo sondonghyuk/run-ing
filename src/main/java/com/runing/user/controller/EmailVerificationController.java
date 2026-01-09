@@ -30,7 +30,7 @@ public class EmailVerificationController {
 		return ResponseEntity.ok(new ApiResponse<>("인증 메일이 발송되었습니다."));
 	}
 
-	@GetMapping("/verify-link")
+	@GetMapping("/verify")
 	public ResponseEntity<ApiResponse<Void>> verifyLink(
 		@RequestParam String token
 	){
