@@ -18,7 +18,7 @@ public class JwtRefreshTokenService {
 
 	private final RedisTemplate<String, String> redisTemplate;
 	private final JWTUtil jwtUtil;
-	private final String PREFIX = "refresh:user"; // Redis Key 충돌 방지용
+	private final String PREFIX = "refresh:user"; // Redis Key
 
 	// Refresh Token 을 Redis 에 저장하면서 TTL 설정
 	public void save(UUID userUuId, String token, long duration, TimeUnit timeUnit) {
