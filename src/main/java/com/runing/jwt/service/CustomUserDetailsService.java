@@ -1,10 +1,11 @@
-package com.runing.jwt;
+package com.runing.jwt.service;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.runing.jwt.dto.CustomUserDetails;
 import com.runing.user.entity.User;
 import com.runing.user.repository.UserRepository;
 

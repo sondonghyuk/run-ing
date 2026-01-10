@@ -1,6 +1,7 @@
 package com.runing.common.config;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,10 +19,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.runing.jwt.CustomUserDetailsService;
-import com.runing.jwt.CustomUsernamePasswordAuthenticationFilter;
-import com.runing.jwt.JWTAuthenticationFilter;
-import com.runing.jwt.JWTUtil;
+import com.runing.jwt.filter.CustomUsernamePasswordAuthenticationFilter;
+import com.runing.jwt.filter.JWTAuthenticationFilter;
+import com.runing.jwt.service.CustomUserDetailsService;
+import com.runing.jwt.service.JwtRefreshTokenService;
+import com.runing.jwt.util.JWTUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +34,7 @@ public class SecurityConfig {
 
 	private final JWTUtil jwtUtil;
 	private final CustomUserDetailsService customUserDetailsService;
+	private final JwtRefreshTokenService jwtRefreshTokenService;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
@@ -51,7 +54,7 @@ public class SecurityConfig {
 		config.setAllowCredentials(true);
 		config.setAllowedHeaders(Collections.singletonList("*"));
 		config.setMaxAge(3600L);
-		config.setExposedHeaders(Collections.singletonList("Authorization"));
+		config.setExposedHeaders(List.of("Authorization","Refresh-Token"));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", config);
@@ -84,13 +87,14 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.POST, "/users/signup").permitAll()
 				.requestMatchers(HttpMethod.POST, "/login").permitAll()
 				.requestMatchers("/email/**").permitAll()
+				.requestMatchers("/auth/refresh").permitAll()
 				.anyRequest().authenticated()
 			);
 
 		// 필터 추가
 		http
 			.addFilterBefore(new JWTAuthenticationFilter(jwtUtil,customUserDetailsService),CustomUsernamePasswordAuthenticationFilter.class)
-			.addFilterAt(new CustomUsernamePasswordAuthenticationFilter(authenticationManager,jwtUtil),
+			.addFilterAt(new CustomUsernamePasswordAuthenticationFilter(authenticationManager,jwtUtil,jwtRefreshTokenService),
 				UsernamePasswordAuthenticationFilter.class);
 
 		// 세션 설정

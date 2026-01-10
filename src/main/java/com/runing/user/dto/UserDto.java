@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.runing.user.entity.Role;
 
 public record UserDto(
-	UUID userId, // 외부 식별자
+	UUID userUuId, // 외부 식별자
 	String email,
 	String name,
 	String nickname,

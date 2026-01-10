@@ -1,4 +1,4 @@
-package com.runing.jwt;
+package com.runing.jwt.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.runing.jwt.dto.JWTUserDto;
 import com.runing.user.entity.Role;
 
 import io.jsonwebtoken.Claims;
@@ -36,6 +37,15 @@ public class JWTUtil {
 		byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8); // 문자열 바이트 변환
 		this.secretKey = Keys.hmacShaKeyFor(keyBytes); // 키 길이 검증(HS256), 알고리즘(HmacSHA256) 자동 매핑
 		this.accessTokenExpiration = accessTokenExpiration;
+	}
+
+	// Refresh 토큰 생성
+	public String createRefreshToken(){
+		return Jwts.builder()
+			.issuedAt(new Date())
+			.expiration(new Date(System.currentTimeMillis()  + 1000L * 60 * 60 * 24 * 7)) // 7일
+			.signWith(secretKey)
+			.compact();
 	}
 
 	// AccessToken 토큰 생성

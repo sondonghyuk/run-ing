@@ -1,4 +1,4 @@
-package com.runing.jwt;
+package com.runing.jwt.dto;
 
 import java.util.UUID;
 

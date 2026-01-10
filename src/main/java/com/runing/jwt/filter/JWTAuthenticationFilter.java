@@ -1,4 +1,4 @@
-package com.runing.jwt;
+package com.runing.jwt.filter;
 
 import java.io.IOException;
 
@@ -7,6 +7,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.runing.jwt.service.CustomUserDetailsService;
+import com.runing.jwt.util.JWTUtil;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -31,7 +34,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-		// Authorization 헤더에서 JWT 토큰 추출
+		// Authorization 헤더에서 JWT 토큰 추출	
 		String authorization = request.getHeader("Authorization");
 
 		//Authorization 헤더 검증 : JWT 헤더가 없을 경우 다음 필터로 넘김

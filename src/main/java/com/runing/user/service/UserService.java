@@ -141,4 +141,11 @@ public class UserService {
 			throw new BaseException(UserErrorCode.USER_NICKNAME_EXISTS);
 		}
 	}
+
+	// 유저 찾기
+	public UserDto findById(UUID uuid) {
+		return userRepository.findByUuid(uuid)
+			.map(userMapper::toDto)
+			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+	}
 }

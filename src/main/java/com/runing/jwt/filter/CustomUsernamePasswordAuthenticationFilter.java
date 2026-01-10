@@ -1,14 +1,20 @@
-package com.runing.jwt;
+package com.runing.jwt.filter;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.runing.jwt.dto.CustomUserDetails;
+import com.runing.jwt.dto.JWTUserDto;
+import com.runing.jwt.service.JwtRefreshTokenService;
+import com.runing.jwt.util.JWTUtil;
 import com.runing.user.entity.Role;
 
 import jakarta.servlet.FilterChain;
@@ -24,6 +30,9 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
 	private final AuthenticationManager authenticationManager;
 	private final JWTUtil jwtUtil;
+	private final JwtRefreshTokenService jwtRefreshTokenService;
+
+	private static final long REFRESH_EXPIRATION_DAYS = 7;
 
 	// 로그인 요청 시 사용자 인증 처리
 	@Override
@@ -49,14 +58,29 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
 			UUID userUuid = customUserDetails.getUserUuid();
 			String email = customUserDetails.getEmail();
-			String name = customUserDetails.getUsername();
+			String name = customUserDetails.getName();
 			Role role = customUserDetails.getRole();
-			//jwt 토큰 생성
-			JWTUserDto user = new JWTUserDto(userUuid,email,name,role);
-			String token = jwtUtil.createAccessToken(user);
 
-			//응답 설정
-			response.addHeader("Authorization", "Bearer " + token);
+			// jwt 토큰 생성
+			JWTUserDto user = new JWTUserDto(userUuid, email, name, role);
+
+			String accessToken = jwtUtil.createAccessToken(user);
+			String refreshToken = jwtUtil.createRefreshToken();
+
+			jwtRefreshTokenService.save(userUuid, refreshToken, REFRESH_EXPIRATION_DAYS, TimeUnit.DAYS);
+
+			// AccessToken 응답
+			response.addHeader("Authorization", "Bearer " + accessToken);
+
+			// RefreshToken 응답
+			ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+				.httpOnly(true)
+				.secure(false)
+				.path("/")
+				.maxAge(60L * 60 * 24 * REFRESH_EXPIRATION_DAYS)
+				.sameSite("Lax")
+				.build();
+			response.addHeader("Set-Cookie", cookie.toString());
 
 			log.info("로그인 성공 - name: {}, role: {}", name, role);
 		} catch (Exception e) {

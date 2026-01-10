@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.runing.common.response.ApiResponse;
-import com.runing.jwt.CustomUserDetails;
+import com.runing.jwt.dto.CustomUserDetails;
 import com.runing.user.dto.ProfileDto;
 import com.runing.user.dto.UserCreateRequest;
 import com.runing.user.dto.UserDto;
@@ -42,7 +42,7 @@ public class UserController {
 	public ResponseEntity<ApiResponse<UserDto>> createUser(@Valid @RequestBody UserCreateRequest request) {
 		UserDto userDto = userService.createUser(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
-			.body(new ApiResponse<>("회원가입이 완료되었습니다.",userDto));
+			.body(new ApiResponse<>("회원가입이 완료되었습니다.", userDto));
 	}
 
 	// 이메일 중복 확인
@@ -75,7 +75,7 @@ public class UserController {
 	) {
 		UUID userId = customUserDetails.getUserUuid();
 		ProfileDto profile = userService.getMyProfile(userId);
-		return ResponseEntity.ok(new ApiResponse<>("프로필 조회 성공했습니다.",profile));
+		return ResponseEntity.ok(new ApiResponse<>("프로필 조회 성공했습니다.", profile));
 	}
 
 	// 회원 정보 수정
@@ -83,9 +83,9 @@ public class UserController {
 	public ResponseEntity<ApiResponse<ProfileDto>> updateMyProfile(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@Valid @RequestBody UserUpdateRequest userUpdateRequest
-	){
+	) {
 		ProfileDto updateProfile = userService.updateProfile(customUserDetails.getUserUuid(), userUpdateRequest);
-		return ResponseEntity.ok(new ApiResponse<>("프로필이 수정되었습니다.",updateProfile));
+		return ResponseEntity.ok(new ApiResponse<>("프로필이 수정되었습니다.", updateProfile));
 	}
 
 }
