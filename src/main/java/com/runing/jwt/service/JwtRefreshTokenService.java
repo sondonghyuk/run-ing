@@ -21,23 +21,23 @@ public class JwtRefreshTokenService {
 	private final String PREFIX = "refresh:user"; // Redis Key 충돌 방지용
 
 	// Refresh Token 을 Redis 에 저장하면서 TTL 설정
-	public void save(UUID userId, String token, long duration, TimeUnit timeUnit) {
-		redisTemplate.opsForValue().set(PREFIX + userId, token, duration, timeUnit);
+	public void save(UUID userUuId, String token, long duration, TimeUnit timeUnit) {
+		redisTemplate.opsForValue().set(PREFIX + userUuId, token, duration, timeUnit);
 	}
 
 	// 특정 사용자에게 저장된 Refresh Token 조회
-	public String get(UUID userId) {
-		return redisTemplate.opsForValue().get(PREFIX+userId);
+	public String get(UUID userUuId) {
+		return redisTemplate.opsForValue().get(PREFIX+userUuId);
 	}
 
 	// Refresh Token 삭제
-	public void delete(UUID userId) {
-		redisTemplate.delete(PREFIX+userId);
+	public void delete(UUID userUuId) {
+		redisTemplate.delete(PREFIX+userUuId);
 	}
 
 	// 현재 유효한 토큰인지 검사
-	public boolean isValid(UUID userId, String token) {
-		String saved = get(userId);
+	public boolean isValid(UUID userUuId, String token) {
+		String saved = get(userUuId);
 		return saved != null && saved.equals(token) && jwtUtil.validateToken(saved);
 	}
 }
