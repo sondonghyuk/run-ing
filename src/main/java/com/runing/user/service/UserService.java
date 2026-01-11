@@ -143,8 +143,8 @@ public class UserService {
 	}
 
 	// 유저 찾기
-	public UserDto findById(UUID uuid) {
-		return userRepository.findByUuid(uuid)
+	public UserDto findById(UUID userUuid) {
+		return userRepository.findByUuid(userUuid)
 			.map(userMapper::toDto)
 			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 	}

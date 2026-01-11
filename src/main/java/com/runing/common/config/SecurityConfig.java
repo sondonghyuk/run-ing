@@ -22,6 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.runing.jwt.filter.CustomUsernamePasswordAuthenticationFilter;
 import com.runing.jwt.filter.JWTAuthenticationFilter;
 import com.runing.jwt.service.CustomUserDetailsService;
+import com.runing.jwt.service.JwtBlacklistService;
 import com.runing.jwt.service.JwtRefreshTokenService;
 import com.runing.jwt.util.JWTUtil;
 
@@ -35,6 +36,7 @@ public class SecurityConfig {
 	private final JWTUtil jwtUtil;
 	private final CustomUserDetailsService customUserDetailsService;
 	private final JwtRefreshTokenService jwtRefreshTokenService;
+	private final JwtBlacklistService jwtBlacklistService;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
@@ -93,7 +95,7 @@ public class SecurityConfig {
 
 		// 필터 추가
 		http
-			.addFilterBefore(new JWTAuthenticationFilter(jwtUtil,customUserDetailsService),CustomUsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(new JWTAuthenticationFilter(jwtUtil,customUserDetailsService,jwtBlacklistService),CustomUsernamePasswordAuthenticationFilter.class)
 			.addFilterAt(new CustomUsernamePasswordAuthenticationFilter(authenticationManager,jwtUtil,jwtRefreshTokenService),
 				UsernamePasswordAuthenticationFilter.class);
 

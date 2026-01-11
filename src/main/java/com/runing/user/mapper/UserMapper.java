@@ -9,6 +9,6 @@ import com.runing.user.entity.User;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-	@Mapping(target = "userId",source = "uuid")
+	@Mapping(target = "userUuid",source = "uuid")
 	UserDto toDto(User user);
 }

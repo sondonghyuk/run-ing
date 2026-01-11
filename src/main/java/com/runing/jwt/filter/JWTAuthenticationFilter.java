@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.runing.jwt.service.CustomUserDetailsService;
+import com.runing.jwt.service.JwtBlacklistService;
 import com.runing.jwt.util.JWTUtil;
 
 import io.jsonwebtoken.Claims;
@@ -29,6 +30,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JWTUtil jwtUtil;
 	private final CustomUserDetailsService customUserDetailsService;
+	private final JwtBlacklistService jwtBlacklistService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -47,6 +49,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 		// Bearer 접두사 제거해 토큰 값 추출
 		String token = authorization.substring(7);
 
+		// Token 이 blacklist 인지 검증
+		if(jwtBlacklistService.isBlacklisted(token)) {
+			log.debug("JWT Token Blacklist");
+			sendErrorResponse(response,"JWT Token Blacklist");
+			return;
+		}
 
 		try{
 			// JWT 유효성 검증
@@ -69,6 +77,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 			if (userDetails == null) {
 				log.warn("사용자가 존재하지 않음 : {}", email);
 				sendErrorResponse(response, "사용자가 존재하지 않음");
+				return;
 			}
 
 			// security 인증 토큰 생성
@@ -80,6 +89,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 		}catch (Exception e) {
 			log.error("JWT Authentication 실패 : {}",e.getMessage());
 			sendErrorResponse(response, "Authentication 실패");
+			return;
 		}
 		filterChain.doFilter(request, response);
 	}

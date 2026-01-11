@@ -42,6 +42,7 @@ public class JWTUtil {
 	// Refresh 토큰 생성
 	public String createRefreshToken(){
 		return Jwts.builder()
+			.id(UUID.randomUUID().toString())
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis()  + 1000L * 60 * 60 * 24 * 7)) // 7일
 			.signWith(secretKey)
@@ -55,9 +56,12 @@ public class JWTUtil {
 
 	// JWT 생성
 	private String createJWT(JWTUserDto user, Long expiration) {
+		String jti = UUID.randomUUID().toString();
 		Date now = new Date();
 		Date expirationDate = new Date(now.getTime() + expiration);
+
 		String token = Jwts.builder()
+			.id(jti)
 			.subject(String.valueOf(user.userUuid()))
 			.claim("email", user.email())
 			.claim("name", user.name())
@@ -100,6 +104,15 @@ public class JWTUtil {
 	}
 
 	// 토큰에서 정보 추출
+	public String getJti(String token) {
+		return getClaims(token).getId();
+	}
+
+	public long getRemainingExpiration(String token) {
+		Date expiration = getClaims(token).getExpiration();
+		return expiration.getTime() - System.currentTimeMillis();
+	}
+
 	public UUID getUserUuid(Claims claims) {
 		return UUID.fromString(claims.getSubject());
 	}
