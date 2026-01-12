@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.runing.user.entity.AuthProvider;
 import com.runing.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -16,4 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	// UUID로 조회
 	Optional<User> findByUuid(UUID uuid);
+
+	boolean existsByProfile_Nickname(String name);
+
+	Optional<User> findByAuthProviderAndProviderId(AuthProvider authProvider, String providerId);
 }

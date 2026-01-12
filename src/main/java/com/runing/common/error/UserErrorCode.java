@@ -15,6 +15,8 @@ public enum UserErrorCode implements ErrorCode {
 	EMAIL_SEND_FAIL(HttpStatus.SERVICE_UNAVAILABLE,"U007","메일 전송에 실패했습니다."),
 	EMAIL_SEND_TOO_FREQUENT(HttpStatus.BAD_REQUEST,"U008","메일 전송한지 1분이 지나지 않았습니다."),
 	EMAIL_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST,"U009","이미 인증된 이메일입니다."),
+	PROVIDER_ID_REQUIRED(HttpStatus.BAD_REQUEST,"U010","Provider ID 필수입니다."),
+	INVALID_AUTH_PROVIDER(HttpStatus.BAD_REQUEST,"U011","잘못된 Provider 입니다."),
 	;
 
 	private final HttpStatus status;

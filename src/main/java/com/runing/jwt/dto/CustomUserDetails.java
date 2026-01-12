@@ -2,11 +2,13 @@ package com.runing.jwt.dto;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.runing.user.entity.Role;
 import com.runing.user.entity.User;
@@ -14,9 +16,15 @@ import com.runing.user.entity.User;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class CustomUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails, OAuth2User {
 
 	private final User user;
+	private Map<String, Object> attributes = Map.of();
+
+	@Override
+	public Map<String,Object> getAttributes() {
+		return attributes;
+	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

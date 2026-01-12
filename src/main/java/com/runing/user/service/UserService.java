@@ -42,7 +42,7 @@ public class UserService {
 
 		// 유저 생성
 		String hashedPassword = passwordEncoder.encode(request.password());
-		User user = new User(request.email(), hashedPassword);
+		User user = User.createLocal(request.email(), hashedPassword);
 		Profile profile = new Profile(
 			request.nickname(),
 			request.name(),
