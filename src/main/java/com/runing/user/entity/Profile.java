@@ -1,6 +1,8 @@
 package com.runing.user.entity;
 
 import com.runing.common.entity.BaseEntity;
+import com.runing.common.error.BaseException;
+import com.runing.common.error.UserErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,5 +63,15 @@ public class Profile extends BaseEntity {
 			this.profileUrl = newProfileUrl;
 		if (newRegion != null && !newRegion.equals(this.region))
 			this.region = newRegion;
+	}
+
+	public void updateProfileUrl(String newProfileUrl) {
+		// null 체크만 수행
+		if (newProfileUrl == null || newProfileUrl.isEmpty()) {
+			throw new BaseException(UserErrorCode.FILE_UPLOAD_FAILED);
+		}
+
+		// 같은 URL이어도 업데이트 허용
+		this.profileUrl = newProfileUrl;
 	}
 }

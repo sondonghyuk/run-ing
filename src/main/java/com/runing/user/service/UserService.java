@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.runing.common.error.BaseException;
 import com.runing.common.error.UserErrorCode;
@@ -31,6 +32,7 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 	private final UserMapper userMapper;
 	private final ProfileMapper profileMapper;
+	private final ProfileImageService profileImageService;
 
 	// 회원가입
 	@Transactional
@@ -143,9 +145,23 @@ public class UserService {
 	}
 
 	// 유저 찾기
-	public UserDto findById(UUID userUuid) {
+	public UserDto findByUuid(UUID userUuid) {
 		return userRepository.findByUuid(userUuid)
 			.map(userMapper::toDto)
 			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+	}
+
+	// 프로필 이미지 업로드
+	@Transactional
+	public String updateProfileImage(UUID userUuid, MultipartFile file){
+		User user = userRepository.findByUuid(userUuid)
+			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+		String oldImageUrl = user.getProfile().getProfileUrl();
+		String newImageUrl = profileImageService.store(file,userUuid,oldImageUrl);
+
+		user.getProfile().updateProfileUrl(newImageUrl);
+
+		return newImageUrl;
 	}
 }

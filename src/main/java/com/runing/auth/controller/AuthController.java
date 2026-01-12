@@ -47,7 +47,7 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Refresh Token 인증 실패"));
 		}
 		// 사용자 조회
-		UserDto user = userService.findById(request.userUuid());
+		UserDto user = userService.findByUuid(request.userUuid());
 
 		// 재발급
 		JWTUserDto jwtUserDto = new JWTUserDto(user.userUuid(),user.email(),user.name(),user.role());

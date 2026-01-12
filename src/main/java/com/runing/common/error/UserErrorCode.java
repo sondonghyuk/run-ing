@@ -17,6 +17,10 @@ public enum UserErrorCode implements ErrorCode {
 	EMAIL_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST,"U009","이미 인증된 이메일입니다."),
 	PROVIDER_ID_REQUIRED(HttpStatus.BAD_REQUEST,"U010","Provider ID 필수입니다."),
 	INVALID_AUTH_PROVIDER(HttpStatus.BAD_REQUEST,"U011","잘못된 Provider 입니다."),
+	UPLOAD_ONLY_IMAGE(HttpStatus.BAD_REQUEST,"U012","이미지 파일만 업로드 가능합니다."),
+	UPLOAD_IMAGE_SIZE_UNDER_5MB(HttpStatus.BAD_REQUEST,"U013","파일 용량은 5MB 이하만 가능합니다."),
+	FILE_IS_EMPTY(HttpStatus.BAD_REQUEST,"U014","파일이 NULL 이거나 Empty 입니다."),
+	FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST,"U015","파일 업로드 실패입니다."),
 	;
 
 	private final HttpStatus status;

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.runing.common.response.ApiResponse;
 import com.runing.jwt.dto.CustomUserDetails;
@@ -20,6 +21,7 @@ import com.runing.user.dto.ProfileDto;
 import com.runing.user.dto.UserCreateRequest;
 import com.runing.user.dto.UserDto;
 import com.runing.user.dto.UserUpdateRequest;
+import com.runing.user.service.ProfileImageService;
 import com.runing.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -36,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Validated
 public class UserController {
 	private final UserService userService;
+	private final ProfileImageService profileImageService;
 
 	// 회원가입
 	@PostMapping("/signup")
@@ -88,4 +91,13 @@ public class UserController {
 		return ResponseEntity.ok(new ApiResponse<>("프로필이 수정되었습니다.", updateProfile));
 	}
 
+	// 프로필 업로드
+	@PostMapping("/profile-image")
+	public ResponseEntity<ApiResponse<String>> uploadProfileImage(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@RequestParam("file") MultipartFile file
+	){
+		String imageUrl = userService.updateProfileImage(customUserDetails.getUserUuid(), file);
+		return ResponseEntity.ok(new ApiResponse<>("프로필 이미지 업로드 성공", imageUrl));
+	}
 }
