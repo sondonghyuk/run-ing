@@ -1,9 +1,11 @@
 package com.runing.common.handler;
 
 import java.io.IOException;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.runing.common.response.ApiResponse;
+import com.runing.common.response.TokenResponse;
 import com.runing.jwt.dto.CustomUserDetails;
 import com.runing.jwt.dto.JWTUserDto;
 import com.runing.jwt.service.JwtRefreshTokenService;
@@ -27,7 +30,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 	private static final long REFRESH_EXPIRATION_DAYS = 7;
 	private final JWTUtil jwtUtil;
 	private final JwtRefreshTokenService jwtRefreshTokenService;
-	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final ObjectMapper objectMapper;
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -43,8 +46,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 		// Redis 저장
 		jwtRefreshTokenService.save(userDetails.getUserUuid(),refreshToken,REFRESH_EXPIRATION_DAYS, TimeUnit.DAYS);
 
-		// RefreshToken → HttpOnly Cookie
-		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+		// RefreshToken은 HttpOnly 쿠키로만 내려주기
+		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
 			.httpOnly(true)
 			.secure(false)
 			.path("/")
@@ -52,14 +55,13 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 			.sameSite("Lax")
 			.build();
 
-		response.addHeader("Set-Cookie", cookie.toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-		// AccessToken을 Map으로 전달
-		Map<String, String> tokenData = Map.of("accessToken", accessToken);
+		// AccessToken은 JSON으로 응답
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		response.setContentType("application/json;charset=UTF-8");
-		response.getWriter().write(objectMapper.writeValueAsString(
-			new ApiResponse<>("OAuth2 로그인 성공", tokenData)
-		));
+		objectMapper.writeValue(response.getWriter(), new ApiResponse<>("success", new TokenResponse(accessToken)));
 	}
 }
