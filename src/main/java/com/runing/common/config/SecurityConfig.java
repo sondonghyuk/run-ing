@@ -42,7 +42,7 @@ public class SecurityConfig {
 	private final OAuth2UserProviderRouter oAuth2UserProviderRouter;
 
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 
