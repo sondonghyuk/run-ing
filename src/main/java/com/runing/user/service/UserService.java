@@ -164,4 +164,13 @@ public class UserService {
 
 		return newImageUrl;
 	}
+
+	// 탈퇴 : 논리삭제
+	@Transactional
+	public void withdraw(UUID userUuid) {
+		User user = userRepository.findByUuid(userUuid)
+			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
+
+		user.withdraw();
+	}
 }

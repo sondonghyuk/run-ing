@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -96,8 +97,17 @@ public class UserController {
 	public ResponseEntity<ApiResponse<String>> uploadProfileImage(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@RequestParam("file") MultipartFile file
-	){
+	) {
 		String imageUrl = userService.updateProfileImage(customUserDetails.getUserUuid(), file);
 		return ResponseEntity.ok(new ApiResponse<>("프로필 이미지 업로드 성공", imageUrl));
+	}
+
+	// 회원 탈퇴
+	@DeleteMapping("/delete")
+	public ResponseEntity<ApiResponse<Void>> withdraw(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails
+	){
+		userService.withdraw(customUserDetails.getUserUuid());
+		return ResponseEntity.ok(new ApiResponse<>("회원 탈퇴가 완료되었습니다."));
 	}
 }
