@@ -2,7 +2,9 @@ package com.runing.auth.controller;
 
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -41,33 +43,44 @@ public class AuthController {
 	private static final long REFRESH_EXPIRATION_DAYS = 7;
 
 	@PostMapping("/refresh")
-	public ResponseEntity<ApiResponse<LoginResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request){
+	public ResponseEntity<ApiResponse<LoginResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
 		// Refresh 검증
-		if(!jwtRefreshTokenService.isValid(request.userUuid(),request.refreshToken())){
+		if (!jwtRefreshTokenService.isValid(request.userUuid(), request.refreshToken())) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Refresh Token 인증 실패"));
 		}
 		// 사용자 조회
 		UserDto user = userService.findByUuid(request.userUuid());
 
 		// 재발급
-		JWTUserDto jwtUserDto = new JWTUserDto(user.userUuid(),user.email(),user.name(),user.role());
+		JWTUserDto jwtUserDto = new JWTUserDto(user.userUuid(), user.email(), user.name(), user.role());
 		String newAccessToken = jwtUtil.createAccessToken(jwtUserDto);
 		String newRefreshToken = jwtUtil.createRefreshToken();
 
 		// Redis 저장소 교체
-		jwtRefreshTokenService.save(user.userUuid(),newRefreshToken,REFRESH_EXPIRATION_DAYS, TimeUnit.DAYS);
+		jwtRefreshTokenService.save(user.userUuid(), newRefreshToken, REFRESH_EXPIRATION_DAYS, TimeUnit.DAYS);
 
-		LoginResponse response = new LoginResponse(newAccessToken,newRefreshToken,user);
-		return ResponseEntity.ok(new ApiResponse<>("Refresh Token 인증 성공",response));
+		// HttpOnly 쿠키로 새 Refresh Token 설정
+		ResponseCookie responseCookie = ResponseCookie.from("refreshToken", newRefreshToken)
+			.httpOnly(true)
+			.secure(false) // 프로덕션 -> true
+			.maxAge(REFRESH_EXPIRATION_DAYS * 24 * 60 * 60)
+			.sameSite("Strict")
+			.build();
+
+		// Access Token 만 응답 body
+		LoginResponse response = new LoginResponse(newAccessToken, null, user);
+
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+			.body(new ApiResponse<>("Refresh Token 인증 성공", response));
 	}
-
 
 	// 로그아웃
 	@PostMapping("/logout")
 	public ResponseEntity<ApiResponse<Void>> logout(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		HttpServletRequest request
-	){
+	) {
 		// 리프레시 토큰 삭제
 		jwtRefreshTokenService.delete(customUserDetails.getUserUuid());
 
