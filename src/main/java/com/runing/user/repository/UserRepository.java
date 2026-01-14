@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.runing.user.entity.AuthProvider;
 import com.runing.user.entity.User;
+import com.runing.user.entity.UserStatus;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 	// 이메일 중복 확인
@@ -21,4 +22,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	boolean existsByProfile_Nickname(String name);
 
 	Optional<User> findByAuthProviderAndProviderId(AuthProvider authProvider, String providerId);
+
+	Optional<User> findByEmailAndStatus(String email, UserStatus userStatus);
 }
