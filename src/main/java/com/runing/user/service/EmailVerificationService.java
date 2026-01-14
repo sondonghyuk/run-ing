@@ -9,6 +9,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.runing.common.config.AppProperties;
 import com.runing.common.error.BaseException;
 import com.runing.common.error.UserErrorCode;
 import com.runing.user.entity.EmailVerification;
@@ -24,10 +25,11 @@ public class EmailVerificationService {
 	private final RedisTemplate<String, String> redisTemplate;
 	private final JavaMailSender mailSender;
 	private final EmailVerificationRepository emailVerificationRepository;
+	private final AppProperties appProperties;
 
 	// 이메일 인증시 호출
 	public void sendVerificationEmail(String email) {
-		log.info("이메일 인증 요청: email={}", email);
+		log.debug("이메일 인증 요청: email={}", email);
 
 		// 이미 인증된 이메일인지 체크
 		emailVerificationRepository.findByEmail(email)
@@ -48,11 +50,16 @@ public class EmailVerificationService {
 		String token = UUID.randomUUID().toString();
 		String redisKey = "email:verify:"+token;
 
+		// 설정값 사용
+		int expirationMinutes = appProperties.getEmail().getVerification().getExpirationMinutes();
+		int rateLimitMinutes = appProperties.getEmail().getVerification().getRateLimitMinutes();
+
+
 		// Redis 저장
-		redisTemplate.opsForValue().set(redisKey,email,10, TimeUnit.MINUTES);
+		redisTemplate.opsForValue().set(redisKey, email, expirationMinutes, TimeUnit.MINUTES);
 
 		// 인증 링크 생성
-		String link = "http://localhost:8080/email/verify?token="+token;
+		String link = String.format("%s/email/verify?token=%s", appProperties.getBaseUrl(), token);
 
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setTo(email);
@@ -61,14 +68,14 @@ public class EmailVerificationService {
 			"안녕하세요,\n\n" +
 				"Run-ing 이메일 인증을 위해 아래 링크를 클릭해주세요.\n\n" +
 				link + "\n\n" +
-				"이 링크는 10분간 유효합니다.\n" +
+				"이 링크는 " + expirationMinutes + "분간 유효합니다.\n" +
 				"본인이 요청하지 않았다면 이 메일을 무시해주세요."
 		);
 
 		try{
 			mailSender.send(message);
 			// 호출 제한 토큰 저장 -> 이 키가 존재하는 동안 재발송 불가 (1분)
-			redisTemplate.opsForValue().set(limitKey,"1",1,TimeUnit.MINUTES);
+			redisTemplate.opsForValue().set(limitKey, "1", rateLimitMinutes, TimeUnit.MINUTES);
 			log.info("이메일 발송 성공: email={}", email);
 		}catch (RuntimeException e) {
 			redisTemplate.delete(redisKey); // 발송 실패시 토큰 제거

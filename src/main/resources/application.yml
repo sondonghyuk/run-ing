@@ -99,3 +99,10 @@ logging:
   level:
     org.springframework.security: DEBUG
     com.runing: DEBUG
+
+app:
+  base-url : http://localhost:8080
+  email:
+    verification:
+      expiration-minutes: 10
+      rate-limit-minutes: 1
