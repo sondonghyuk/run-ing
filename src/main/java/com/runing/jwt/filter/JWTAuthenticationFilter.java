@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.runing.common.response.sendErrorResponse;
 import com.runing.jwt.service.CustomUserDetailsService;
 import com.runing.jwt.service.JwtBlacklistService;
 import com.runing.jwt.util.JWTUtil;
@@ -52,7 +53,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 		// Token 이 blacklist 인지 검증
 		if(jwtBlacklistService.isBlacklisted(token)) {
 			log.debug("JWT Token Blacklist");
-			sendErrorResponse(response,"JWT Token Blacklist");
+			sendErrorResponse.sendResponse(response,"JWT Token Blacklist");
 			return;
 		}
 
@@ -60,7 +61,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 			// JWT 유효성 검증
 			if (!jwtUtil.validateToken(token)) {
 				log.warn("JWT token 유효성 검증 실패");
-				sendErrorResponse(response, "JWT token 유효성 실패");
+				sendErrorResponse.sendResponse(response, "JWT token 유효성 실패");
 				return;
 			}
 
@@ -76,7 +77,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 			// 사용자가 존재 하지 않는 경우
 			if (userDetails == null) {
 				log.warn("사용자가 존재하지 않음 : {}", email);
-				sendErrorResponse(response, "사용자가 존재하지 않음");
+				sendErrorResponse.sendResponse(response, "사용자가 존재하지 않음");
 				return;
 			}
 
@@ -88,16 +89,9 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 		}catch (Exception e) {
 			log.error("JWT Authentication 실패 : {}",e.getMessage());
-			sendErrorResponse(response, "Authentication 실패");
+			sendErrorResponse.sendResponse(response, "Authentication 실패");
 			return;
 		}
 		filterChain.doFilter(request, response);
-	}
-
-	private static void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		response.getWriter().write("{\"error\": \"" + message + "\"}");
 	}
 }
