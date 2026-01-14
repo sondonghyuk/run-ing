@@ -33,7 +33,7 @@ spring:
   mail:
     host: smtp.gmail.com # Gmail 의 SMTP 서버 호스트
     port: 587
-    username: sondonghyuk0304@gmail.com
+    username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
       mail:
