@@ -1,12 +1,13 @@
 package com.runing.jwt.dto;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -28,14 +29,9 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-		authorities.add(new GrantedAuthority() {
-			@Override
-			public @Nullable String getAuthority() {
-				return user.getRole().toString();
-			}
-		});
-		return authorities;
+		return Collections.singletonList(
+			new SimpleGrantedAuthority(user.getRole().toString())
+		);
 	}
 
 
@@ -69,16 +65,21 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 		return true;
 	}
 
-	public @Nullable UUID getUserUuid(){
+	public UUID getUserUuid(){
 		return user.getUuid();
 	}
-	public @Nullable String getEmail(){
+	public String getEmail(){
 		return user.getEmail();
 	}
-	public @Nullable String getName(){
-		return user.getProfile().getName();
+	public String getName(){
+		// Profile 자체가 null 인지 체크
+		if (user.getProfile() == null) {
+			return user.getEmail();
+		}
+		// Profile 은 있지만 name 은 null 인 경우
+		return user.getProfile().getName() != null ?  user.getProfile().getName() : user.getEmail();
 	}
-	public @Nullable Role getRole(){
+	public Role getRole(){
 		return user.getRole();
 	}
 }
