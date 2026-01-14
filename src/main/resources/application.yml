@@ -21,6 +21,11 @@ spring:
           time_zone: Asia/Seoul
 
   jwt:
+    cookie:
+      secure: false
+      same-site: Lax
+      http-only: true
+      max-age-days: 7
     secret: ${JWT_SECRET}
     access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}  # 기본값 1시간
     refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}  # 기본값 7일
@@ -29,7 +34,7 @@ spring:
     host: smtp.gmail.com # Gmail 의 SMTP 서버 호스트
     port: 587
     username: sondonghyuk0304@gmail.com
-    password : ${MAIL_PASSWORD}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:

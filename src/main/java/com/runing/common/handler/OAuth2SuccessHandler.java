@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.runing.common.config.JwtCookieProperties;
 import com.runing.common.response.ApiResponse;
 import com.runing.common.response.TokenResponse;
 import com.runing.jwt.dto.CustomUserDetails;
@@ -31,6 +32,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 	private final JWTUtil jwtUtil;
 	private final JwtRefreshTokenService jwtRefreshTokenService;
 	private final ObjectMapper objectMapper;
+	private final JwtCookieProperties jwtCookieProperties;
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -48,11 +50,11 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
 		// RefreshToken은 HttpOnly 쿠키로만 내려주기
 		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-			.httpOnly(true)
-			.secure(false)
+			.httpOnly(jwtCookieProperties.isHttpOnly())
+			.secure(jwtCookieProperties.isSecure())
 			.path("/")
-			.maxAge(TimeUnit.DAYS.toSeconds(REFRESH_EXPIRATION_DAYS))
-			.sameSite("Lax")
+			.maxAge(TimeUnit.DAYS.toSeconds(jwtCookieProperties.getMaxAgeDays()))
+			.sameSite(jwtCookieProperties.getSameSite())
 			.build();
 
 		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
