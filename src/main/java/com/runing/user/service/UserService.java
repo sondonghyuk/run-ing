@@ -157,10 +157,15 @@ public class UserService {
 		User user = userRepository.findByUuid(userUuid)
 			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
-		String oldImageUrl = user.getProfile().getProfileUrl();
+		Profile profile = user.getProfile();
+		if (profile == null) {
+			throw new BaseException(UserErrorCode.PROFILE_NOT_FOUND);
+		}
+
+		String oldImageUrl = profile.getProfileUrl();
 		String newImageUrl = profileImageService.store(file,userUuid,oldImageUrl);
 
-		user.getProfile().updateProfileUrl(newImageUrl);
+		profile.updateProfileUrl(newImageUrl);
 
 		return newImageUrl;
 	}
