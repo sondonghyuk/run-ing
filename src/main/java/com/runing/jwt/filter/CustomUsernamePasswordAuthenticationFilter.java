@@ -40,7 +40,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 		AuthenticationException {
 		// 로그인 시도
 		String username = obtainUsername(request);
-		log.info("로그인 시도 - username: {}", username);
+		log.debug("로그인 시도 - username: {}", username);
 		String password = obtainPassword(request);
 
 		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password);
