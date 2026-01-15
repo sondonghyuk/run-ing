@@ -9,7 +9,7 @@ import org.springframework.http.ResponseCookie;
 import lombok.Getter;
 
 @Getter
-@ConfigurationProperties(prefix = "jwt.cookie")
+@ConfigurationProperties(prefix = "spring.jwt.cookie")
 public class JwtCookieProperties {
 
 	private final boolean secure;
