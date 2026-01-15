@@ -56,8 +56,8 @@ public class UserService {
 
 		// 저장
 		User savedUser = userRepository.save(user);
-		log.info("사용자 생성 완료 : id={} , email={}, username={}", savedUser.getId(), savedUser.getEmail(),
-			savedUser.getProfile().getName());
+		log.info("사용자 생성 완료 : id={}", savedUser.getId());
+		log.debug("생성된 사용자 상세 : email={}, username={}", savedUser.getEmail(),savedUser.getProfile().getName());
 
 		// userDto 변환 후 반환
 		return userMapper.toDto(savedUser);
