@@ -78,6 +78,11 @@ public class AuthController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		HttpServletRequest request
 	) {
+		// customUserDetails null 체크
+		if(customUserDetails == null){
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("인증되지 않은 사용자입니다."));
+		}
+
 		// 리프레시 토큰 삭제
 		jwtRefreshTokenService.delete(customUserDetails.getUserUuid());
 
