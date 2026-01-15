@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.runing.common.config.JwtCookieProperties;
 import com.runing.common.response.SendErrorResponse;
 import com.runing.jwt.dto.CustomUserDetails;
 import com.runing.jwt.dto.JWTUserDto;
@@ -32,7 +33,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 	private final AuthenticationManager authenticationManager;
 	private final JWTUtil jwtUtil;
 	private final JwtRefreshTokenService jwtRefreshTokenService;
-
+	private final JwtCookieProperties jwtCookieProperties;
 	private static final long REFRESH_EXPIRATION_DAYS = 7;
 
 	// 로그인 요청 시 사용자 인증 처리
@@ -53,9 +54,12 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 		Authentication authResult) throws IOException, ServletException {
+
+		CustomUserDetails customUserDetails = null;
+
 		try {
 			// 사용자 정보 추출
-			CustomUserDetails customUserDetails = (CustomUserDetails)authResult.getPrincipal();
+			customUserDetails = (CustomUserDetails)authResult.getPrincipal();
 
 			UUID userUuid = customUserDetails.getUserUuid();
 			String email = customUserDetails.getEmail();
@@ -74,19 +78,19 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 			response.addHeader("Authorization", "Bearer " + accessToken);
 
 			// RefreshToken 응답
-			ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-				.httpOnly(true)
-				.secure(false)
-				.path("/")
-				.maxAge(60L * 60 * 24 * REFRESH_EXPIRATION_DAYS)
-				.sameSite("Lax")
-				.build();
+			ResponseCookie cookie = jwtCookieProperties.createCookie("refreshToken", refreshToken);
+
 			response.addHeader("Set-Cookie", cookie.toString());
 
-			log.info("로그인 성공 - name: {}, role: {}", name, role);
+			log.info("로그인 성공 - userId: {}", userUuid);
+			log.debug("로그인 사용자 정보 - email: {}, name: {}, role: {}", email, name, role);
 		} catch (Exception e) {
-			log.error("JWT 토큰 생성 중 오류 발생", e);
-			SendErrorResponse.sendResponse(response,"토큰 생성 오류");
+			// 어떤 사용자의 오류인지 추적 가능하도록 userId 포함
+			log.error("JWT 토큰 생성 중 오류 발생 - userId: {}",
+				customUserDetails != null ? customUserDetails.getUserUuid() : "unknown", e);
+
+			// HTTP 상태 코드 명시
+			SendErrorResponse.sendResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "토큰 생성 오류");
 		}
 	}
 
