@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
+@Setter
 @Component
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {
@@ -14,10 +15,12 @@ public class AppProperties {
 	private Email email = new Email();
 
 	@Getter
+	@Setter
 	public static class Email {
 		private Verification verification = new Verification();
 
 		@Getter
+		@Setter
 		public static class Verification {
 			private int expirationMinutes = 10;
 			private int rateLimitMinutes = 1;
