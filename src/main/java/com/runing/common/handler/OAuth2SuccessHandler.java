@@ -49,13 +49,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 		jwtRefreshTokenService.save(userDetails.getUserUuid(),refreshToken,REFRESH_EXPIRATION_DAYS, TimeUnit.DAYS);
 
 		// RefreshToken은 HttpOnly 쿠키로만 내려주기
-		ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-			.httpOnly(jwtCookieProperties.isHttpOnly())
-			.secure(jwtCookieProperties.isSecure())
-			.path("/")
-			.maxAge(TimeUnit.DAYS.toSeconds(jwtCookieProperties.getMaxAgeDays()))
-			.sameSite(jwtCookieProperties.getSameSite())
-			.build();
+		ResponseCookie refreshCookie = jwtCookieProperties.createCookie("refreshToken", refreshToken);
 
 		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 

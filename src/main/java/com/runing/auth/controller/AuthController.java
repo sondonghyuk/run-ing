@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.runing.auth.dto.LoginResponse;
 import com.runing.auth.dto.RefreshTokenRequest;
+import com.runing.common.config.JwtCookieProperties;
 import com.runing.common.response.ApiResponse;
 import com.runing.jwt.dto.CustomUserDetails;
 import com.runing.jwt.dto.JWTUserDto;
@@ -41,6 +42,7 @@ public class AuthController {
 	private final JWTUtil jwtUtil;
 	private final JwtBlacklistService jwtBlacklistService;
 	private static final long REFRESH_EXPIRATION_DAYS = 7;
+	private final JwtCookieProperties jwtCookieProperties;
 
 	@PostMapping("/refresh")
 	public ResponseEntity<ApiResponse<LoginResponse>> refresh(@Valid @RequestBody RefreshTokenRequest request) {
@@ -60,12 +62,7 @@ public class AuthController {
 		jwtRefreshTokenService.save(user.userUuid(), newRefreshToken, REFRESH_EXPIRATION_DAYS, TimeUnit.DAYS);
 
 		// HttpOnly 쿠키로 새 Refresh Token 설정
-		ResponseCookie responseCookie = ResponseCookie.from("refreshToken", newRefreshToken)
-			.httpOnly(true)
-			.secure(false) // 프로덕션 -> true
-			.maxAge(REFRESH_EXPIRATION_DAYS * 24 * 60 * 60)
-			.sameSite("Strict")
-			.build();
+		ResponseCookie responseCookie = jwtCookieProperties.createCookie("refreshToken", newRefreshToken);
 
 		// Access Token 만 응답 body
 		LoginResponse response = new LoginResponse(newAccessToken, null, user);
