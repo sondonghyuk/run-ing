@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.runing.common.response.sendErrorResponse;
+import com.runing.common.response.SendErrorResponse;
 import com.runing.jwt.dto.CustomUserDetails;
 import com.runing.jwt.dto.JWTUserDto;
 import com.runing.jwt.service.JwtRefreshTokenService;
@@ -86,7 +86,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 			log.info("로그인 성공 - name: {}, role: {}", name, role);
 		} catch (Exception e) {
 			log.error("JWT 토큰 생성 중 오류 발생", e);
-			sendErrorResponse.sendResponse(response,"토큰 생성 오류");
+			SendErrorResponse.sendResponse(response,"토큰 생성 오류");
 		}
 	}
 

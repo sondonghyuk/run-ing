@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-public class sendErrorResponse {
+public class SendErrorResponse {
 
 	public static void sendResponse(HttpServletResponse response, String message) throws IOException {
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
