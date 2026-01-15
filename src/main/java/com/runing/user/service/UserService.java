@@ -65,6 +65,8 @@ public class UserService {
 
 	// 마이페이지 조회
 	public ProfileDto getMyProfile(UUID userUuid){
+		log.debug("프로필 조회 - userId: {}", userUuid);
+
 		// 유저 찾기
 		User user = userRepository.findByUuid(userUuid)
 			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
@@ -102,7 +104,13 @@ public class UserService {
 			request.region()
 		);
 
-		log.info("프로필 업데이트 완료 : userId={}, email={}", userUuid, user.getEmail());
+		log.info("프로필 업데이트 완료 - userId: {}", userUuid);
+		log.debug("업데이트된 프로필 상세 - nickname: {}, name: {}, phoneNumber: {}, region: {}",
+			request.nickname(),
+			request.name(),
+			request.phoneNumber(),
+			request.region());
+
 
 		return profileMapper.toDto(user);
 	}
@@ -131,6 +139,8 @@ public class UserService {
 	// 이메일 중복 확인 (API 용도)
 	@Transactional(readOnly = true)
 	public void checkDuplicateEmail(String email) {
+		log.debug("이메일 중복 확인 - email: {}", email);
+
 		if(userRepository.existsByEmail(email)) {
 			throw new BaseException(UserErrorCode.USER_EMAIL_EXISTS);
 		}
@@ -139,6 +149,8 @@ public class UserService {
 	// 닉네임 중복 확인 (API 용도)
 	@Transactional(readOnly = true)
 	public void checkDuplicateNickname(String nickname) {
+		log.debug("닉네임 중복 확인 - nickname: {}", nickname);
+
 		if (profileRepository.existsByNickname(nickname)) {
 			throw new BaseException(UserErrorCode.USER_NICKNAME_EXISTS);
 		}
@@ -146,6 +158,8 @@ public class UserService {
 
 	// 유저 찾기
 	public UserDto findByUuid(UUID userUuid) {
+		log.debug("사용자 조회 - userId: {}", userUuid);
+
 		return userRepository.findByUuid(userUuid)
 			.map(userMapper::toDto)
 			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
@@ -167,6 +181,9 @@ public class UserService {
 
 		profile.updateProfileUrl(newImageUrl);
 
+		log.info("프로필 이미지 업데이트 완료 - userId: {}", userUuid);
+		log.debug("프로필 이미지 URL - oldUrl: {}, newUrl: {}", oldImageUrl, newImageUrl);
+
 		return newImageUrl;
 	}
 
@@ -177,5 +194,8 @@ public class UserService {
 			.orElseThrow(() -> new BaseException(UserErrorCode.USER_NOT_FOUND));
 
 		user.withdraw();
+
+		log.info("사용자 탈퇴 완료 - userId: {}", userUuid);
+		log.debug("탈퇴한 사용자 정보 - email: {}", user.getEmail());
 	}
 }
